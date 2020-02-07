@@ -1,0 +1,4 @@
+playground.py
+__pycache__/*
+data/*
+submissions/*
