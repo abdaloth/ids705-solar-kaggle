@@ -8,7 +8,7 @@ from tqdm import tqdm
 # %% 
 X, y = get_data()
 
-hog_params = {'cell_size':(16, 16), 'block_size':(4, 4)}
+hog_params = {'cell_size':(16, 16), 'block_size':(2, 2)}
 X = np.stack([get_HOG(img, **hog_params) for img in X ])
 
 # %%
