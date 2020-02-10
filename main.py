@@ -1,12 +1,14 @@
 import numpy as np
-from utils import get_data, plot_roc, make_submission
+from utils import get_data, get_HOG, plot_roc, make_submission
 from sklearn.model_selection import StratifiedKFold
 from sklearn.svm import SVC
 
 from tqdm import tqdm
 
-
 X, y = get_data()
+X = np.stack([get_HOG(img) for img in X ])
+
+# %%
 
 clf = SVC(C=10, probability=True, random_state=42)
 
@@ -26,7 +28,10 @@ for train_idx, val_idx in tqdm(skf.split(X, y)):
 
 plot_roc(y, prediction_scores)
 
+# %%
 X_test, test_ids = get_data(test=True)
+X_test = np.stack([get_HOG(img) for img in X_test])
 
+clf = clf.fit(X, y)
 test_predictions = clf.predict_proba(X_test)[:,1]
-make_submission(test_ids, test_predictions, fname='submissions/svc_10_hog_16_2.csv')
+make_submission(test_ids, test_predictions, fname='submissions/svc_10_hog_16_2_fulltrain.csv')
