@@ -5,8 +5,11 @@ from sklearn.svm import SVC
 
 from tqdm import tqdm
 
+# %% 
 X, y = get_data()
-X = np.stack([get_HOG(img) for img in X ])
+
+hog_params = {'cell_size':(16, 16), 'block_size':(4, 4)}
+X = np.stack([get_HOG(img, **hog_params) for img in X ])
 
 # %%
 
@@ -30,8 +33,8 @@ plot_roc(y, prediction_scores)
 
 # %%
 X_test, test_ids = get_data(test=True)
-X_test = np.stack([get_HOG(img) for img in X_test])
+X_test = np.stack([get_HOG(img, **hog_params) for img in X_test])
 
 clf = clf.fit(X, y)
 test_predictions = clf.predict_proba(X_test)[:,1]
-make_submission(test_ids, test_predictions, fname='submissions/svc_10_hog_16_2_fulltrain.csv')
+make_submission(test_ids, test_predictions, fname='submissions/svc_10_hog_16_4_fulltrain.csv')
