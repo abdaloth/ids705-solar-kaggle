@@ -13,12 +13,6 @@ import sklearn.metrics as metrics
 import matplotlib.pyplot as plt
 
 
-def load(filename):
-    # read image in single channel (greyscale)
-    return imread(filename, as_gray=True)
-    
-
-
 def get_HOG(img, cell_size=(16, 16), block_size=(2, 2)):
     # return Histogram of Oriented Gradients (HOG) features
     return hog(img, pixels_per_cell=cell_size,
@@ -26,14 +20,14 @@ def get_HOG(img, cell_size=(16, 16), block_size=(2, 2)):
 
 
 
-def get_data(data_dir_path='./data', test=False):
+def get_data(data_dir_path='./data', test=False, as_gray=True):
     if(not test):
         train_ids, train_labels = np.loadtxt(f'{data_dir_path}/labels_training.csv',
                                              delimiter=',',
                                              skiprows=1,
                                              unpack=True,
                                              dtype=int)
-        X = np.stack([load(f'{data_dir_path}/training/{id}.tif') for id in train_ids])
+        X = np.stack([imread(f'{data_dir_path}/training/{id}.tif', as_gray) for id in train_ids])
         return X, train_labels
     else:
         test_ids = np.loadtxt(f'{data_dir_path}/sample_submission.csv',
@@ -41,7 +35,7 @@ def get_data(data_dir_path='./data', test=False):
                                 skiprows=1,
                                 usecols=0,
                                 dtype=int)
-        X = np.stack([load(f'{data_dir_path}/testing/{id}.tif') for id in test_ids])
+        X = np.stack([imread(f'{data_dir_path}/testing/{id}.tif', as_gray) for id in test_ids])
         return X, test_ids
 
 
