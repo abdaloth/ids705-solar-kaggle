@@ -12,6 +12,25 @@ import sklearn.metrics as metrics
 
 import matplotlib.pyplot as plt
 
+from keras.callbacks import Callback
+
+class ROCAUC(Callback):
+    def __init__(self, BATCH_SIZE=128):
+        super(ROCAUC, self).__init__()
+        self.BATCH_SIZE = BATCH_SIZE
+
+    def on_train_begin(self, logs={}):
+        if not ('val_auc' in self.params['metrics']):
+            self.params['metrics'].append('val_auc')
+
+    def on_epoch_end(self, epoch, logs={}):
+        logs['val_auc'] = float('-inf')
+        if(self.validation_data):
+            logs['val_auc'] = roc_auc_score(self.validation_data[1],
+                                            self.model.predict(self.validation_data[0],
+                                                               batch_size=self.BATCH_SIZE))
+
+
 
 def get_HOG(img, cell_size=(16, 16), block_size=(2, 2)):
     # return Histogram of Oriented Gradients (HOG) features
