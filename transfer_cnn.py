@@ -1,13 +1,8 @@
-import numpy as np
-
 from keras.applications.vgg16 import VGG16
 
 from keras.models import Model
 from keras import layers as nn
 from keras.callbacks import ModelCheckpoint, EarlyStopping
-
-from skimage.io import imread
-from sklearn.metrics import roc_auc_score
 
 from utils import make_submission, get_data, ROCAUC
 

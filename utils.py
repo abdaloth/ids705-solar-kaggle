@@ -26,7 +26,7 @@ class ROCAUC(Callback):
     def on_epoch_end(self, epoch, logs={}):
         logs['val_auc'] = float('-inf')
         if(self.validation_data):
-            logs['val_auc'] = roc_auc_score(self.validation_data[1],
+            logs['val_auc'] = metrics.roc_auc_score(self.validation_data[1],
                                             self.model.predict(self.validation_data[0],
                                                                batch_size=self.BATCH_SIZE))
 
