@@ -12,8 +12,10 @@ import sklearn.metrics as metrics
 
 import matplotlib.pyplot as plt
 
-from keras.callbacks import Callback
 
+from keras.callbacks import Callback
+    
+    
 class ROCAUC(Callback):
     def __init__(self, BATCH_SIZE=128):
         super(ROCAUC, self).__init__()
