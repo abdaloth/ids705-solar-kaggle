@@ -2,7 +2,7 @@
 from sklearn.decomposition import PCA
 from sklearn.linear_model import LogisticRegression
 from utils import make_submission, get_data, plot_roc, get_pca_data
-from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import StratifiedKFold, StratifiedShuffleSplit, GridSearchCV
 from sklearn.svm import SVC
 import matplotlib.pyplot as plt 
 import numpy as np
@@ -12,10 +12,25 @@ from tqdm import tqdm
 
 X, y = get_data(data_dir_path='./data/data') #Read in Data
 
-#Fit model to data using selected number of principal components [1000].
-
+#Transform data with PCA
 X_transform = get_pca_data(X, 1000)
 
+
+#Doing a grid search to identify best hyperparameters for SVM. 
+
+C_vals = np.logspace(-2, 10, 13)
+gammas = np.logspace(-9, 3, 13)
+grid= dict(gamma=gammas, C=C_vals)
+splits = StratifiedShuffleSplit(n_splits=5, test_size=0.2, random_state=42)
+grid = GridSearchCV(SVC(), param_grid=grid, cv= splits)
+grid.fit(X_transform, y)
+
+#Print 'Best' combination of hyperparameters. 
+print("The best parameters are %s with a score of %0.2f"
+      % (grid.best_params_, grid.best_score_))
+
+
+#Fitting model over multiple folds with selected hyperparameters. 
 skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 prediction_scores = np.empty(y.shape[0],dtype='object')
 
