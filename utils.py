@@ -7,6 +7,7 @@ import pandas as pd
 
 from skimage.io import imread
 from skimage.feature import hog
+from sklearn.decomposition import PCA
 
 import sklearn.metrics as metrics
 
@@ -39,7 +40,17 @@ def get_HOG(img, cell_size=(16, 16), block_size=(2, 2)):
     return hog(img, pixels_per_cell=cell_size,
                cells_per_block=block_size)
 
-
+def get_pca_data(X, num_components, default = True):
+    nsamples, nx, ny = X.shape #Reshape data to be passed to PCA. 
+    X = X.reshape(nsamples, nx*ny)
+    if default:
+        pca_limited = PCA(n_components = num_components)
+        X_transform  = pca_limited.fit_transform(X)
+    else:
+        pca_limited = PCA(n_components = num_components)
+        X_transform  = pca_limited.fit_transform(X, n_components = 1000)
+    #Return transformed data
+    return(X_transform)
 
 def get_data(data_dir_path='./data', test=False, as_gray=True):
     if(not test):

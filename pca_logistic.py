@@ -1,7 +1,7 @@
 # %%
 from sklearn.decomposition import PCA
 from sklearn.linear_model import LogisticRegression
-from utils import make_submission, get_data, plot_roc
+from utils import make_submission, get_data, plot_roc, get_pca_data
 from sklearn.model_selection import StratifiedKFold
 import matplotlib.pyplot as plt 
 import numpy as np
@@ -12,9 +12,10 @@ from tqdm import tqdm
 X, y = get_data(data_dir_path='./data/data') #Read in Data
 
 nsamples, nx, ny = X.shape #Reshape data to be passed to PCA. 
-X = X.reshape(nsamples, nx*ny)
+X_shape = X.reshape(nsamples, nx*ny)
+
 pca = PCA() # Applying PCA to our data
-pca.fit(X)
+pca.fit(X_shape)
 
 
 #Visualizing the principal components. 
@@ -27,8 +28,7 @@ plt.show()
 
 #Fit model to data using selected number of principal components [1000].
 
-pca_limited = PCA(n_components = 1000)
-X_transform  = pca_limited.fit_transform(X) #Transforming data.
+X_transform = get_pca_data(X, 1000)
 
 skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 prediction_scores = np.empty(y.shape[0],dtype='object')
