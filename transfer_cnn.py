@@ -51,5 +51,5 @@ X_test, test_ids = get_data(test=True, as_gray=False)
 
 test_predictions = model.predict(X_test, batch_size=batch_size)
 test_predictions = test_predictions.flatten()
-make_submission(test_ids, test_predictions, 'submissions/first_transfer_cnn.csv')
 
+plot_roc(test_ids, test_predictions)
