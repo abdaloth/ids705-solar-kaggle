@@ -15,9 +15,10 @@ from sklearn.model_selection import StratifiedKFold
 
 # %%
 
-BATCH_SIZE = 128
+BATCH_SIZE = 256
 EPOCHS = 50
-
+LEARNING_RATE = 1e-3
+LR_DECAY = LEARNING_RATE/EPOCHS
 conv_params = {'kernel_size': 3,
                'padding': 'same',
                'activation': 'relu'}
@@ -60,7 +61,7 @@ def get_model():
 
     model = Model(inputs=cnn_input, outputs=output)
     model.compile(loss='binary_crossentropy',
-                  optimizer=opt.Adam(lr=1e-3, decay=2e-5))
+                  optimizer=opt.Adam(lr=LEARNING_RATE, decay=LR_DECAY))
     return model
 
 
