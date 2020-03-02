@@ -2,7 +2,7 @@
 
 [150 words maximum] This should be the one paragraph that captures the significance of what you did and why you did it
 
-## Introduction. 
+## Introduction.
 
 (Provide a description of the problem and the value in finding a solution, motivate your reader as to why he/she should care about this question. The idea is to get your reader excited about the solution you are about to present.)
 
@@ -15,17 +15,19 @@ Currently, solar PVs are widely used in building applications, and gathering inf
 
 Satellite data has opened up a new way of us looking into the world, but it also brings in new challenges such as extracting useful information from massive data. In this report, we will explore potential computer algorithms to automatically recognize PV panel information from high-resolution color aerial imagery. Accurately identifying PV panels from aerial imagery could assist researchers in identifying global solar panel placement trends as well as helping determine if panels are being optimally placed.
 
-## Background. 
+## Background.
 
 Computer algorithms have been used to identify solar panels in the past. Jordan M. Malof and his colleagues suggested a new approach to detect rooftop solar PV in aerial imagery using computer vision algorithms.[^](Malof, J. M., Hou Rui, L. M. Collins, K. Bradbury, and R. Newell. "Automatic Solar Photovoltaic Panel Detection in Satellite Imagery." Paper presented at the 2015 International Conference on Renewable Energy Research and Applications (ICRERA), 22-25 Nov. 2015 2015.) They used house images from the U.S. Geological Survey (USGS). “The imagery was collected over the city of Lemoore, CA during 2014 at a resolution of 0.3m, and with 8-bit resolution in each color channel.” They manually chose 100 images, 50 that contained rooftop PV installations and 50 that did not contain rooftop PV installations. Each figure was cropped to a rectangular region containing the rooftop and the surrounding area. The decision algorithm consisted of two parts: prescreening and feature processing. Prescreening first converts all images into grayscale and reduced the region by removing the lowest 30\% of pre-screener confidence values. The features examined here include foreground color, background color, and shape features. Then a support vector machine (SVM) classifier was utilized to generate the final list of detected regions. They suggested that their work could be possibly used to estimate power capacity and energy production in a fast, scalable and cheap method.
 
 From their work, we can conclude that the first step of using aerial imagery data in solar PV involves feature extraction, classifier, and object detection. Feature extractions can be accomplished by several different algorithms, however, the main principle in feature extraction is extracting image features, and effectively mapping the 3 channel (RGB) images into  lower-dimensional data. As for classifiers, besides the SVM mentioned above, Jordan M. Malof and his colleagues used a trained random forest classifier into the same dataset[^](Malof, Jordan M., Kyle Bradbury, Leslie M. Collins, and Richard G. Newell. "Automatic Detection of Solar Photovoltaic Arrays in High-Resolution Aerial Imagery." Applied Energy 183 (2016/12/01/ 2016): 229-40. https://doi.org/https://doi.org/10.1016/j.apenergy.2016.08.191.), they found out that this classifier was also effective at detecting PV panel in aerial images.
 
+Additional study- DeepSolar: A Machine Learning Framework to Efficiently Construct a Solar Deployment Database in the United States
+http://www.sciencedirect.com/science/article/pii/S2542435118305701
 
 
-## Data. 
+## Data.
 
-The data we used in this analysis is similar to the data mentioned in the background section. The images are of 101\*101 pixels and are in 3 channels (RGB). All the images contain the rooftop of houses and some surrounding areas. The data is divided into training and test, with the training data containing 1500 images and test containing 558 images. We will train our decision algorithms on training data, and then test our algorithm performance on test data. 
+The data we used in this analysis is similar to the data mentioned in the background section. The images are of 101\*101 pixels and are in 3 channels (RGB). All the images contain the rooftop of houses and some surrounding areas. The data is divided into training and test, with the training data containing 1500 images and test containing 558 images. We will train our decision algorithms on training data, and then test our algorithm performance on test data.
 figure 1 (images with PV solar, and images without PV solar)
 figure 2 feature extraction
 figure 3 object detection
@@ -75,9 +77,8 @@ For the classification part, we used the `SVC` class from `scikit-learn` , with 
 
 We evaluated the performance of our model using 5-fold stratified cross-validation and analysing the ROC curve.
 
-### (Method 2)
-
-Lorem Ipsum
+### Canny Edge Detection SVM
+Our second approach also utilized a support vector cl
 
 ### Transfer Learning
 
@@ -120,7 +121,7 @@ It takes as input an RGB image of size $101 \times 101 \times 3$ RGB image and p
 
 ### (Method 4)
 
-## Conclusions. 
+## Conclusions.
 
 compare different models and evaluate what did good, what did not so good
 
