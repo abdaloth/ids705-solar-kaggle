@@ -60,20 +60,21 @@ for train_idx, val_idx in tqdm(skf.split(X, y)):
 
 plot_roc(y, prediction_scores)
 
-#Read in test data and fit model. Need to fix. 
+#Read in test data and fit model. 
 
-test_ids, test_y = get_data(data_dir_path='./data/data', as_gray = True)
-
-for i in range (test_ids.shape[0]):
-    test_ids[i] = cv2.Canny(test_ids[i],100,200)
+test_x, test_ids = get_data(data_dir_path='./data/data', as_gray = True. test=True)
+test_x = test_x *256
+test_x = test_x.astype(np.uint8, copy=False)
+for i in range (test_x.shape[0]):
+    test_x[i] = cv2.Canny(test_x[i],100,200)
     
-test_ids = test_ids.astype(np.uint8, copy=False)
+
     
-nsamples, nx, ny = test_ids.shape
-test_ids = test_ids.reshape((nsamples,nx*ny))
+nsamples, nx, ny = test_x.shape
+test_x = test_x.reshape((nsamples,nx*ny))
 
 
-clf = clf.fit(X, y)
-test_predictions = clf.predict_proba(test_ids)[:,1]
+clf = SVC(probability = True, gamma = 'scale').fit(X, y)
+test_predictions = clf.predict_proba(test_x)[:,1]
 
-make_submission(test_ids, test_predictions, fname='submissions/scv_edge_detection_fulltrain.csv')
+make_submission(test_ids, test_predictions, fname='scv_edge_detection_fulltrain.csv')
