@@ -23,7 +23,7 @@ From their work, we can conclude that the first step of using aerial imagery dat
 
 Another study, conducted by researchers at Stanford University, aimed to tackle a similar problem: determining the distribution of solar panels using satellite imagery. This study went a step further- the researchers used their algorithm to create a national solar panel database. They then used this database to identify demographic and economic features that were associated With the presence of solar panels. Perhaps most interestingly, they found
 "a solar radiation threshold (4.5 kWh/m2
-/day) above which the solar deployment is triggered."  These predictors were then used to produce a model to predict the presence of solar panels. 
+/day) above which the solar deployment is triggered."  These predictors were then used to produce a model to predict the presence of solar panels.
 
 
 Citation   - DeepSolar: A Machine Learning Framework to Efficiently Construct a Solar Deployment Database in the United States
@@ -83,8 +83,16 @@ For the classification part, we used the `SVC` class from `scikit-learn` , with 
 We evaluated the performance of our model using 5-fold stratified cross-validation and analysing the ROC curve.
 
 ### Canny Edge Detection SVM
-Our second approach also utilized a support vector cl
+Our second approach used a different type of pre-preocessing called Canny Edge Detection.
 
+Canny edge detection is a 5-step process that extracts edges from an image.
+
+This technique does not work well with high amounts of noise. Removal of the noise improves the algorithm's performance. The first step is gaussian filtering, which "blurs" the image and reduces noise while keeping the edges intact. After filtering, the intensity gradient of the image is calculated. Edges are associated with changes in pixel intensity, so this gradient allows us to identify preliminary edges. However, at this point, the image produces has edges that vary wildly in thickness. Thinner and more consistent edges are better for image classification, so the algorithm corrects for this using non-maximum suppression. Non-maximum suppression 
+
+ We selected this technique because it appears that solar panels have obvious and straight edges. A solar panel on a residential home  (after edge detection) could look like boxes inside a box.
+
+
+J. Canny, "A Computational Approach to Edge Detection," in IEEE Transactions on Pattern Analysis and Machine Intelligence, vol. PAMI-8, no. 6, pp. 679-698, Nov. 1986.
 ### Transfer Learning
 
 Convolutional neural networks are a mainstream technique in image classification. Its popularity stems not only from its remarkable accuracy, but also from its ability to create its own features, so to speak. In the words of Zagoruyko and Komodakis (2015, p.4353) [^](Zagoruyko, S., & Komodakis, N. (2015). Learning to compare image patches via convolutional neural networks. In Proceedings of the IEEE conference on computer vision and pattern recognition (pp. 4353-4361).), CNNs can
