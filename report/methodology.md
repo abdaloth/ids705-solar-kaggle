@@ -1,3 +1,8 @@
+---
+output:
+  word_document: default
+  html_document: default
+---
 ## Abstract
 
 [150 words maximum] This should be the one paragraph that captures the significance of what you did and why you did it
