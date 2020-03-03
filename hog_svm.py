@@ -3,7 +3,7 @@ traditional machine learning approach with HOG features and an SVM classifier
 """
 # %%
 import numpy as np
-from utils import get_data, get_HOG, plot_roc, make_submission
+from utils import get_data, get_HOG, plot_roc, make_submission, plot_prediction_samples
 from sklearn.model_selection import StratifiedKFold
 from sklearn.svm import SVC
 
@@ -12,7 +12,7 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 
 # %% 
-X, y = get_data()
+imgs, y = get_data()
 
 # compute image features
 
@@ -20,7 +20,7 @@ X, y = get_data()
 hog_params = {'cell_size':(16, 16), 'block_size':(2, 2)}
 
 # stack the feature arrays into one big input matrix
-X = np.stack([get_HOG(img, **hog_params) for img in X ])
+X = np.stack([get_HOG(img, **hog_params) for img in imgs ])
 
 # %%
 
@@ -46,6 +46,8 @@ plt.title('SVM 5-fold cross validation ROC AUC')
 plot_roc(y, prediction_scores)
 plt.savefig('report/figures/svm_roc.png', dpi=300)
 
+plot_prediction_samples(imgs, y, prediction_scores, 'SVM Prediction Samples')
+plt.savefig('report/figures/svm_confmat.png', dpi=300)
 # %%
 
 # load and preprocess test data then create submission
