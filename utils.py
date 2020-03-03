@@ -12,31 +12,11 @@ import sklearn.metrics as metrics
 
 import matplotlib.pyplot as plt
 
-from keras.callbacks import Callback
-
-class ROCAUC(Callback):
-    def __init__(self, BATCH_SIZE=128):
-        super(ROCAUC, self).__init__()
-        self.BATCH_SIZE = BATCH_SIZE
-
-    def on_train_begin(self, logs={}):
-        if not ('val_auc' in self.params['metrics']):
-            self.params['metrics'].append('val_auc')
-
-    def on_epoch_end(self, epoch, logs={}):
-        logs['val_auc'] = float('-inf')
-        if(self.validation_data):
-            logs['val_auc'] = metrics.roc_auc_score(self.validation_data[1],
-                                            self.model.predict(self.validation_data[0],
-                                                               batch_size=self.BATCH_SIZE))
-
-
 
 def get_HOG(img, cell_size=(16, 16), block_size=(2, 2)):
     # return Histogram of Oriented Gradients (HOG) features
     return hog(img, pixels_per_cell=cell_size,
                cells_per_block=block_size)
-
 
 
 def get_data(data_dir_path='./data', test=False, as_gray=True):
@@ -50,13 +30,58 @@ def get_data(data_dir_path='./data', test=False, as_gray=True):
         return X, train_labels
     else:
         test_ids = np.loadtxt(f'{data_dir_path}/sample_submission.csv',
-                                delimiter=',',
-                                skiprows=1,
-                                usecols=0,
-                                dtype=int)
+                              delimiter=',',
+                              skiprows=1,
+                              usecols=0,
+                              dtype=int)
         X = np.stack([imread(f'{data_dir_path}/testing/{id}.tif', as_gray) for id in test_ids])
         return X, test_ids
 
+
+def get_misclassified_indices(labels, prediction_scores):
+
+    # turn probabilities to labels
+    predicted_labels = (prediction_scores > .5).astype(int)
+
+    # create an array mask for misclassification
+    missed_mask = labels != predicted_labels
+
+    # sort sample indices by confidence score (desc)
+    sorted_idx = np.argsort(prediction_scores)[::-1]
+
+    # return sorted list of misclassified indices
+    filtered_idx = sorted_idx[missed_mask[sorted_idx]]
+
+    return filtered_idx
+
+
+def plot_misclassifications(imgs, labels, prediction_scores, n=3):
+
+    idx = get_misclassified_indices(labels, prediction_scores)
+    fig, ax = plt.subplots(2, n)
+
+    for i in range(n):
+        high_conf_idx = idx[i]
+        low_conf_idx = idx[-(i+1)]
+
+        ax[0, i].imshow(imgs[high_conf_idx])
+        ax[0, i].set(xticklabels=[],
+                     yticklabels=[],
+                     xticks=[],
+                     yticks=[],
+                     title=(f'label = {labels[high_conf_idx]}',
+                            f'\nprediction = {prediction_scores[high_conf_idx]:.3f}'))
+
+        ax[1, i].imshow(imgs[low_conf_idx])
+        ax[1, i].set(xticklabels=[],
+                     yticklabels=[],
+                     xticks=[],
+                     yticks=[],
+                     title=(f'label = {labels[low_conf_idx]}',
+                            f'\n prediction = {prediction_scores[low_conf_idx]:.3f}'))
+        pass
+
+    fig.tight_layout()
 
 
 def plot_roc(y_true, y_pred):
@@ -76,7 +101,7 @@ def plot_roc(y_true, y_pred):
 
 
 def make_submission(test_ids, test_predictions, fname='submission.csv'):
-    submission = pd.DataFrame({'id':test_ids, 'score': test_predictions})
+    submission = pd.DataFrame({'id': test_ids, 'score': test_predictions})
     submission.to_csv(fname, index=False)
     pass
 
