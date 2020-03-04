@@ -11,10 +11,11 @@ from sklearn.metrics import roc_auc_score
 from keras.utils.np_utils import to_categorical
 from utils import make_submission, get_data
 
-from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import StratifiedKFold, train_test_split
 
 # %%
 
+# set up global variables
 BATCH_SIZE = 256
 EPOCHS = 50
 LEARNING_RATE = 1e-3
@@ -25,7 +26,7 @@ conv_params = {'kernel_size': 3,
 
 
 def get_model():
-
+    " return CNN model"
     cnn_input = nn.Input(shape=(101, 101, 3))
 
     x = nn.Conv2D(filters=32, **conv_params)(cnn_input)
@@ -69,8 +70,10 @@ model = get_model()
 model.summary()
 # %%
 X, y = get_data(as_gray=False)
-X = X/255.
+X = X/255. # normalize input
 
+# image augmentation to (rotate, horizontal flip, shift)
+# to aid in generalized performance
 imagen = ImageDataGenerator(
     featurewise_center=False,
     featurewise_std_normalization=False,
@@ -82,10 +85,12 @@ imagen = ImageDataGenerator(
 
 imagen.fit(X)
 
-
+# number of batches in an epoch
 batch_per_epoch = len(X)/BATCH_SIZE
 
 # %%
+# 5-fold cross validation that has the double functionality of validating the performance of CNN architecture
+# and we can bag the models trained on each subset to decorrelate the results
 skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 
 prediction_scores = np.empty(y.shape[0], dtype='object')
@@ -102,22 +107,23 @@ for train_idx, val_idx in skf.split(X, y):
                         epochs=EPOCHS, verbose=0)
     prediction_scores[val_idx] = model.predict(X_val,
                                                batch_size=BATCH_SIZE)[:, 1]
-    cur_auc = roc_auc_score(y_val, prediction_scores[val_idx])
-    print(cur_auc)
-    if cur_auc < 0.8:
-        break
+                                               
     models.append(model)
 
 print(roc_auc_score(y, prediction_scores))
 
 # %%
+
+# load the testing data
 X_test, test_ids = get_data(test=True, as_gray=False)
 X_test = X_test/255.
 
+# get the average predictions of the models trained on the dataset folds
 test_predictions = np.mean([m.predict(X_test,
                                       batch_size=BATCH_SIZE)[:, 1] for m in models], axis=0)
 
 make_submission(test_ids, test_predictions,
                 'submissions/homebrew_cnn_CV.csv')
 # %%
+# save the trained models
 [m.save(f'data/models/model_fold_{i}.h5') for i, m in enumerate(models)]
