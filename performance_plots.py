@@ -1,5 +1,6 @@
 # %%
 
+import seaborn as sns
 import numpy as np
 
 import matplotlib.pyplot as plt
@@ -37,7 +38,7 @@ ensemble_preds = ensemble_preds/5
 model_preds = [canny_svm_preds, hog_svm_preds,
                bagged_cnn_preds,
                transfer_preds,
-                ensemble_preds]
+               ensemble_preds]
 
 model_names = ['Canny SVM',
                'HOG SVM',
@@ -82,6 +83,28 @@ ax.legend(loc='lower center',
 fig.tight_layout()
 plt.title('Comparing Performance of Different Models (ROC Curve)')
 plt.savefig('report/figures/all_roc.png', dpi=300, bbox_inches='tight')
+# %%
+fig, ax = plt.subplots(2, 3, constrained_layout=True)
+ax = ax.ravel()
+y_true = labels
+
+for i, (name, y_pred, y_true) in enumerate(zip(model_names, model_preds, y_vals)):
+    predictions = (y_pred > .5).astype(int)
+    sns.heatmap(metrics.confusion_matrix(y_true,
+                                         predictions, normalize='all'),
+                annot=True,
+                square=True,
+                linewidths=0.5,
+                cmap='Blues',
+                cbar=False,
+                fmt='.2f',
+                ax=ax[i])
+    ax[i].set(xlabel='Predicted Class',
+              ylabel='True Class',
+              title=f'{name}')
+fig.delaxes(ax[-1])
+fig.suptitle('Comparing Performance of Different Models \n(Confusion Matrices)')
+plt.savefig('report/figures/all_confmat.png', dpi=300, bbox_inches='tight')
 
 # %%
 
