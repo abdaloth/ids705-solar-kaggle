@@ -115,6 +115,10 @@ fig.tight_layout()
 plt.savefig('report/figures/bagged_cnn_roc.png', dpi=300, bbox_inches='tight')
 # %%
 
+plot_prediction_samples(imgs, labels,
+                        svm_preds, 'SVM Prediction Samples')
+plt.savefig('report/figures/svm_confmat.png', dpi=300)
+
 plot_prediction_samples(imgs[super_idx], y_super_test,
                         ensemble_preds, 'Weighted Voting Prediction Samples')
 plt.savefig('report/figures/weighted_voting_confmat.png', dpi=300)
