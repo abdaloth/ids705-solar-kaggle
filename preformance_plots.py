@@ -73,46 +73,9 @@ ax.legend(loc='lower center',
           bbox_to_anchor=(0.5, -0.5))
 
 fig.tight_layout()
-plt.title('Comparing Preformance of Different Models (ROC)')
+plt.title('Comparing Performance of Different Models (ROC Curve)')
 plt.savefig('report/figures/all_roc.png', dpi=300, bbox_inches='tight')
 
-# %%
-
-skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
-fig, ax = plt.subplots(1, 1)
-for i, (_, val_idx) in enumerate(skf.split(X, y)):
-    y_pred, y_true = cnn_preds[val_idx], y[val_idx]
-
-    fpr, tpr, _ = metrics.roc_curve(y_true, y_pred, pos_label=1)
-    auc = metrics.roc_auc_score(y_true, y_pred)
-    legend_string = f'subset {i} ; AUC = {auc:0.3f}'
-    alpha = .4
-    ax.plot(fpr, tpr, ls='--', label=legend_string, alpha=alpha)
-
-ax.plot([0, 1], [0, 1], '--', color='gray', label='Chance')
-
-fpr, tpr, _ = metrics.roc_curve(y_super_test, bagged_cnn_preds, pos_label=1)
-auc = metrics.roc_auc_score(y_super_test, bagged_cnn_preds)
-ax.plot(fpr, tpr, label=f'Bagged CNN ; AUC = {auc:0.3f}')
-ax.set(xlabel='False Positive Rate',
-       ylabel='True Positive Rate')
-
-ax.grid(True)
-ax.axis('square')
-# Shrink current axis's height by 10% on the bottom
-box = ax.get_position()
-ax.set_position([box.x0, box.y0 + box.height * 0.1,
-                 box.width, box.height * 0.9])
-
-ax.legend(loc='lower center',
-          ncol=3,
-          fancybox=True,
-          shadow=True,
-          bbox_to_anchor=(0.5, -0.5))
-
-plt.title('Bagging multiple CNN models trained on subsets of the same data')
-fig.tight_layout()
-plt.savefig('report/figures/bagged_cnn_roc.png', dpi=300, bbox_inches='tight')
 # %%
 
 plot_prediction_samples(imgs, labels,
@@ -157,36 +120,62 @@ ax.legend(loc='lower center',
           shadow=True,
           bbox_to_anchor=(0.5, -0.5))
 fig.tight_layout()
-plt.title('Comparing Preformance of Different Models (Precision-Recall Curve)')
+plt.title('Comparing Performance of Different Models (Precision-Recall Curve)')
 plt.savefig('report/figures/all_pr.png', dpi=300, bbox_inches='tight')
 
 # %%
 
 skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
-fig, ax = plt.subplots(1, 1)
+fig, (ax1, ax2) = plt.subplots(1, 2, sharex=True, constrained_layout=True)
+
+skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 for i, (_, val_idx) in enumerate(skf.split(X, y)):
     y_pred, y_true = cnn_preds[val_idx], y[val_idx]
+
+    fpr, tpr, _ = metrics.roc_curve(y_true, y_pred, pos_label=1)
     precision, recall, _ = metrics.precision_recall_curve(y_true, y_pred, pos_label=1)
+    ax1.step(recall, precision, label= f'subset {i}', alpha=alpha)
+    auc = metrics.roc_auc_score(y_true, y_pred)
+    legend_string = f'subset {i} ; AUC = {auc:0.3f}'
     alpha = .4
-    ax.step(recall, precision, label= f'subset {i}', alpha=alpha)
+    ax2.plot(fpr, tpr, ls='--', label=legend_string, alpha=alpha)
+
 
 precision, recall, _ = metrics.precision_recall_curve(y_super_test, bagged_cnn_preds, pos_label=1)
-ax.step(recall, precision, label='Bagged CNN')
-ax.set(ylabel='Precision',xlabel='Recall')
+ax1.step(recall, precision, label='Bagged CNN')
+ax1.set(ylabel='Precision',xlabel='Recall')
 
-ax.grid(True)
-ax.axis('square')
+ax2.plot([0, 1], [0, 1], '--', color='gray', label='Chance')
+
+fpr, tpr, _ = metrics.roc_curve(y_super_test, bagged_cnn_preds, pos_label=1)
+auc = metrics.roc_auc_score(y_super_test, bagged_cnn_preds)
+ax2.plot(fpr, tpr, label=f'Bagged CNN ; AUC = {auc:0.3f}')
+ax2.set(xlabel='False Positive Rate',
+       ylabel='True Positive Rate')
+
+ax1.grid(True)
+ax1.axis('square')
+
+ax2.grid(True)
+ax2.axis('square')
 # Shrink current axis's height by 10% on the bottom
-box = ax.get_position()
-ax.set_position([box.x0, box.y0 + box.height * 0.1,
+
+box = ax1.get_position()
+ax1.set_position([box.x0, box.y0 + box.height * 0.1,
                  box.width, box.height * 0.9])
 
-ax.legend(loc='lower center',
-          ncol=3,
-          fancybox=True,
-          shadow=True,
-          bbox_to_anchor=(0.5, -0.5))
-
-plt.title('Bagging multiple CNN models trained on subsets of the same data')
+box = ax.get_position()
+ax2.set_position([box.x0, box.y0 + box.height * 0.1,
+                 box.width, box.height * 0.9])
+labels = [f'subset {i}' for i in range(5)]
+labels.append('Bagged CNN')
 fig.tight_layout()
-plt.savefig('report/figures/bagged_cnn_pr.png', dpi=300, bbox_inches='tight')
+fig.suptitle('Bagging Multiple CNN Models, Trained on Subsets of The Same Data')
+fig.legend(loc='lower center',
+          ncol=3,
+          labels=labels,
+          fancybox=True,
+          shadow=True)
+
+
+plt.savefig('report/figures/bagged_cnn_compare.png', dpi=300, bbox_inches='tight')
