@@ -18,8 +18,12 @@ X, _, y, y_super_test = train_test_split(imgs, labels,
                                          random_state=42,
                                          stratify=labels)
 
-svm_preds = np.load('data/svm_train_preds.npy',
-                    allow_pickle=True)
+canny_svm_preds = np.load('data/canny_svm_train_preds.npy',
+                          allow_pickle=True)
+
+hog_svm_preds = np.load('data/hog_svm_train_preds.npy',
+                        allow_pickle=True)
+
 cnn_preds = np.load('data/cv_cnn_train_preds.npy',
                     allow_pickle=True)
 transfer_preds = np.load('data/transfer_cnn_train_preds.npy',
@@ -27,19 +31,22 @@ transfer_preds = np.load('data/transfer_cnn_train_preds.npy',
 
 bagged_cnn_preds = np.load('data/cv_cnn_super_preds.npy',
                            allow_pickle=True)
-ensemble_preds = 3*bagged_cnn_preds+transfer_preds+svm_preds[super_idx]
+ensemble_preds = 3*bagged_cnn_preds+transfer_preds+hog_svm_preds[super_idx]
 ensemble_preds = ensemble_preds/5
 
-model_preds = [svm_preds, transfer_preds,
-               bagged_cnn_preds, ensemble_preds]
+model_preds = [canny_svm_preds, hog_svm_preds,
+               bagged_cnn_preds,
+               transfer_preds,
+                ensemble_preds]
 
-model_names = ['SVM',
-               'Transfer Learning',
+model_names = ['Canny SVM',
+               'HOG SVM',
                'Bagged CNN',
+               'Transfer Learning',
                'Weighted Voting']
 
 
-y_vals = [labels, y_super_test, y_super_test, y_super_test]
+y_vals = [labels, labels, y_super_test, y_super_test, y_super_test]
 
 # %%
 
@@ -79,8 +86,12 @@ plt.savefig('report/figures/all_roc.png', dpi=300, bbox_inches='tight')
 # %%
 
 plot_prediction_samples(imgs, labels,
-                        svm_preds, 'SVM Prediction Samples')
-plt.savefig('report/figures/svm_confmat.png', dpi=300)
+                        canny_svm_preds, 'Canny SVM Prediction Samples')
+plt.savefig('report/figures/canny_svm_confmat.png', dpi=300)
+
+plot_prediction_samples(imgs, labels,
+                        hog_svm_preds, 'HOG SVM Prediction Samples')
+plt.savefig('report/figures/hog_svm_confmat.png', dpi=300)
 
 plot_prediction_samples(imgs[super_idx], y_super_test,
                         ensemble_preds, 'Weighted Voting Prediction Samples')
@@ -99,16 +110,17 @@ plt.savefig('report/figures/bagged_cnn_confmat.png', dpi=300)
 fig, ax = plt.subplots(1, 1)
 y_true = labels
 for name, y_pred, y_true in zip(model_names, model_preds, y_vals):
-    precision, recall, _ = metrics.precision_recall_curve(y_true, y_pred, pos_label=1)
+    precision, recall, _ = metrics.precision_recall_curve(
+        y_true, y_pred, pos_label=1)
     alpha = .4
     if(name == 'Weighted Voting'):
         alpha = 1
 
     ax.step(recall, precision, label=name, alpha=alpha)
 
-ax.set(ylabel='Precision',xlabel='Recall')
+ax.set(ylabel='Precision', xlabel='Recall')
 ax.axis('square')
-ax.set_ylim(0.3,1.01)
+ax.set_ylim(0.3, 1.01)
 # Shrink current axis's height by 10% on the bottom
 box = ax.get_position()
 ax.set_position([box.x0, box.y0 + box.height * 0.1,
@@ -133,17 +145,19 @@ for i, (_, val_idx) in enumerate(skf.split(X, y)):
     y_pred, y_true = cnn_preds[val_idx], y[val_idx]
 
     fpr, tpr, _ = metrics.roc_curve(y_true, y_pred, pos_label=1)
-    precision, recall, _ = metrics.precision_recall_curve(y_true, y_pred, pos_label=1)
-    ax1.step(recall, precision, label= f'subset {i}', alpha=alpha)
+    precision, recall, _ = metrics.precision_recall_curve(
+        y_true, y_pred, pos_label=1)
+    ax1.step(recall, precision, label=f'subset {i}', alpha=alpha)
     auc = metrics.roc_auc_score(y_true, y_pred)
     legend_string = f'subset {i} ; AUC = {auc:0.3f}'
     alpha = .4
     ax2.plot(fpr, tpr, ls='--', label=legend_string, alpha=alpha)
 
 
-precision, recall, _ = metrics.precision_recall_curve(y_super_test, bagged_cnn_preds, pos_label=1)
+precision, recall, _ = metrics.precision_recall_curve(
+    y_super_test, bagged_cnn_preds, pos_label=1)
 ax1.step(recall, precision, label='Bagged CNN')
-ax1.set(ylabel='Precision',xlabel='Recall')
+ax1.set(ylabel='Precision', xlabel='Recall')
 
 ax2.plot([0, 1], [0, 1], '--', color='gray', label='Chance')
 
@@ -151,7 +165,7 @@ fpr, tpr, _ = metrics.roc_curve(y_super_test, bagged_cnn_preds, pos_label=1)
 auc = metrics.roc_auc_score(y_super_test, bagged_cnn_preds)
 ax2.plot(fpr, tpr, label=f'Bagged CNN ; AUC = {auc:0.3f}')
 ax2.set(xlabel='False Positive Rate',
-       ylabel='True Positive Rate')
+        ylabel='True Positive Rate')
 
 ax1.grid(True)
 ax1.axis('square')
@@ -162,20 +176,21 @@ ax2.axis('square')
 
 box = ax1.get_position()
 ax1.set_position([box.x0, box.y0 + box.height * 0.1,
-                 box.width, box.height * 0.9])
+                  box.width, box.height * 0.9])
 
 box = ax.get_position()
 ax2.set_position([box.x0, box.y0 + box.height * 0.1,
-                 box.width, box.height * 0.9])
+                  box.width, box.height * 0.9])
 labels = [f'subset {i}' for i in range(5)]
 labels.append('Bagged CNN')
 fig.tight_layout()
 fig.suptitle('Bagging Multiple CNN Models, Trained on Subsets of The Same Data')
 fig.legend(loc='lower center',
-          ncol=3,
-          labels=labels,
-          fancybox=True,
-          shadow=True)
+           ncol=3,
+           labels=labels,
+           fancybox=True,
+           shadow=True)
 
 
-plt.savefig('report/figures/bagged_cnn_compare.png', dpi=300, bbox_inches='tight')
+plt.savefig('report/figures/bagged_cnn_compare.png',
+            dpi=300, bbox_inches='tight')
