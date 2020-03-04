@@ -130,3 +130,63 @@ plt.savefig('report/figures/transfer_cnn_confmat.png', dpi=300)
 plot_prediction_samples(imgs[super_idx], y_super_test,
                         bagged_cnn_preds, 'Bagged CNN Prediction Samples')
 plt.savefig('report/figures/bagged_cnn_confmat.png', dpi=300)
+
+# %%
+
+fig, ax = plt.subplots(1, 1)
+y_true = labels
+for name, y_pred, y_true in zip(model_names, model_preds, y_vals):
+    precision, recall, _ = metrics.precision_recall_curve(y_true, y_pred, pos_label=1)
+    alpha = .4
+    if(name == 'Weighted Voting'):
+        alpha = 1
+
+    ax.step(recall, precision, label=name, alpha=alpha)
+
+ax.set(ylabel='Precision',xlabel='Recall')
+ax.axis('square')
+ax.set_ylim(0.3,1.01)
+# Shrink current axis's height by 10% on the bottom
+box = ax.get_position()
+ax.set_position([box.x0, box.y0 + box.height * 0.1,
+                 box.width, box.height * 0.9])
+
+ax.legend(loc='lower center',
+          ncol=3,
+          fancybox=True,
+          shadow=True,
+          bbox_to_anchor=(0.5, -0.5))
+fig.tight_layout()
+plt.title('Comparing Preformance of Different Models (Precision-Recall Curve)')
+plt.savefig('report/figures/all_pr.png', dpi=300, bbox_inches='tight')
+
+# %%
+
+skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+fig, ax = plt.subplots(1, 1)
+for i, (_, val_idx) in enumerate(skf.split(X, y)):
+    y_pred, y_true = cnn_preds[val_idx], y[val_idx]
+    precision, recall, _ = metrics.precision_recall_curve(y_true, y_pred, pos_label=1)
+    alpha = .4
+    ax.step(recall, precision, label= f'subset {i}', alpha=alpha)
+
+precision, recall, _ = metrics.precision_recall_curve(y_super_test, bagged_cnn_preds, pos_label=1)
+ax.step(recall, precision, label='Bagged CNN')
+ax.set(ylabel='Precision',xlabel='Recall')
+
+ax.grid(True)
+ax.axis('square')
+# Shrink current axis's height by 10% on the bottom
+box = ax.get_position()
+ax.set_position([box.x0, box.y0 + box.height * 0.1,
+                 box.width, box.height * 0.9])
+
+ax.legend(loc='lower center',
+          ncol=3,
+          fancybox=True,
+          shadow=True,
+          bbox_to_anchor=(0.5, -0.5))
+
+plt.title('Bagging multiple CNN models trained on subsets of the same data')
+fig.tight_layout()
+plt.savefig('report/figures/bagged_cnn_pr.png', dpi=300, bbox_inches='tight')
