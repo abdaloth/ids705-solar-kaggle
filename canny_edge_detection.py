@@ -28,16 +28,20 @@ X = X*256
  
 #Convert x values to integers 
 X = X.astype(np.uint8, copy=False)
-edges = cv2.Canny(X[3],100,200)
-plt.imshow(X[3])
-plt.imshow(edges)
-plt.show()
 
 #Applying conversion algorithm to all the data 
 for i in range (X.shape[0]):
     X[i] = cv2.Canny(X[i],100,200)
 
-    
+#Printing out data 
+fig, (ax1, ax2) =plt.subplots(1,2)
+ax1.set_title('Image Without Solar Panels')
+ax2.set_title('Image With Solar Panels')
+ax2.axis('off')
+ax1.axis('off')
+plt.suptitle('Sample Images Using Canny Edge Detection')
+ax1.imshow(X[2])
+ax2.imshow(X[3])
 #Changing data more to fit proper shape
 
 nsamples, nx, ny = X.shape
